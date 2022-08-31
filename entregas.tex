@@ -1,0 +1,71 @@
+\documentclass{beamer}
+\usefonttheme{professionalfonts}
+\setbeamertemplate{footline}{}
+\beamertemplatenavigationsymbolsempty
+
+\usepackage[utf8]{inputenc}
+\usepackage{color}
+\usepackage{tcolorbox}
+
+\DeclareUnicodeCharacter{03BB}{\ensuremath{\lambda}}
+\definecolor{c1}{RGB}{219,78,158}   
+\definecolor{c2}{RGB}{18,110,213}  
+\definecolor{c3}{RGB}{251,0,29} 
+\definecolor{c4}{RGB}{114,0,172}
+\newcommand{\prim}{\textcolor{c1}}
+\newcommand{\secondary}{\textcolor{c2}}
+\newcommand{\tertiary}{\textcolor{c3}}
+\newcommand{\quarterly}{\textcolor{c4}}
+
+\newtcbox{\enunciado}[1][]{colback=purple!5!white,colframe=purple!75!black,boxsep=4pt,boxrule=1pt,#1}
+
+\begin{document}
+
+\begin{frame}[fragile]
+\frametitle{λ-calculus - Ejercicio 3.5}
+
+\begin{center}
+\enunciado{
+    $$ ( λx.( ( λ y.x y ) z ) ) ( λx.x y ) $$
+}
+
+$$
+( \prim{λx} . ( \secondary{λy} . \prim{x} \: \secondary{y} ) \: z ) \:
+( \tertiary{λx} . \tertiary{x} \: y )
+$$
+
+\begin{tabular}{l|r}
+  Orden Normal & Orden Aplicativo\\ \hline
+  $ ( \prim{λx} . ( λ y. \prim{x} y ) z ) \prim{( λx'.x' y')} $ & $ ( λx. (\prim{λy} . x \prim{y} ) \prim{z}) ( λx'.x' y' ) $\\ 
+  $ ( \prim{λy} . ( λx'.x' y' ) \prim{y} ) \prim{z} $           & $ ( \prim{λx} . \prim{x} z ) \prim{(λx'.x' y')} $\\ 
+  $ ( \prim{λx'} . \prim{x'} y' ) \prim{z} $                    & $ ( \prim{λx'} .  \prim{x'} y' ) \prim{z} $\\ 
+  $ z y' $                                                         & $ z y' $\\ 
+\end{tabular}
+
+\end{center}
+\end{frame}
+
+\begin{frame}[fragile]
+\frametitle{λ-calculus - Ejercicio 3.6}
+  
+\begin{center}
+\enunciado{
+    $$ ( ( λy.( λx.( ( λ x.λy.x ) x ) ) y ) M ) N $$
+}
+
+$$
+(\prim{λy} . ( \secondary{λx} . ( \tertiary{λxy} . \tertiary{x} ) \secondary{x} )  \prim{y} )  M N
+$$
+
+\begin{tabular}{l|r}
+  Orden Normal & Orden Aplicativo\\ \hline
+  $ (\prim{λy}. (λx. (λx'y'.x')x)\prim{y}) \prim{M} N $ & $ (λy. (λx. (\prim{λx'}y'.\prim{x'})\prim{x})y) M N $ \\
+  $ (\prim{λx}. (λx'y'.x')\prim{x}) \prim{M} N  $       & $ (λy. (\prim{λx}y'.\prim{x})\prim{y}) M N $ \\
+  $ (\prim{λx'} y' . \prim{x'}) \prim{M} N  $           & $ (\prim{λy}y'.\prim{y}) \prim{M} N $ \\
+  $ (\prim{λy'}.M) \prim{N}  $                          & $ (\prim{λy'}.M) \prim{N}  $ \\
+  $ M $                                                 & $ M $ \\
+\end{tabular}
+
+\end{center}
+\end{frame}
+\end{document}
