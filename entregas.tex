@@ -7,6 +7,8 @@
 \usepackage{color}
 \usepackage{tcolorbox}
 \usepackage{newunicodechar}
+\let\OldTexttt\texttt
+\renewcommand{\texttt}[1]{\OldTexttt{\color{magenta}{#1}}}
 
 % https://analyzethedatanotthedrivel.org/2011/08/15/typesetting-utf8-apl-code-with-the-latex-lstlisting-package/
 \usepackage{fontspec}
@@ -115,6 +117,7 @@ $$
         style=apl,
         backgroundcolor=\color{codebackground},
         frame=tbrl,
+        basicstyle=\ttfamily\scriptsize,
         xleftmargin=1.5cm,
         xrightmargin=1.5cm]
       A ← (1 + ⍳ 3) , 3 + ⍳ 3
@@ -128,6 +131,15 @@ $$
   2 2 3 3 3 4
       \end{lstlisting}
   \end{center}
+
+\begin{enumerate}
+  \item Se asigna a A el vector \texttt{2 3 4 4 5 6} (porque se concatenan dos indices de 3 desplazados)
+  \item Se pide por los indices \texttt{1 4} que son \texttt{2 4}
+  \item Se pide por los indices \texttt{2 3 4 4 5 6} (A)
+  \item Se pide por los indices \texttt{2 3 4 4 5 6 2 3 4 4 5 6} (A duplicado)
+  \item Se pide por los indices \texttt{1 1 2 2 2 3} (todos los miembros, divididos por 2 y redondeados para abajo)
+\end{enumerate}
+
 \end{frame}
 
 \begin{frame}[fragile]
@@ -149,6 +161,14 @@ $$
   IDNUM AIROLGTISNART CIS
       \end{lstlisting}
   \end{center}
+
+  \begin{enumerate}
+    \item Se asigna a B la cadena 'SIC TRANSITGLORIA MUNDI'
+    \item Se pide el tamaño de la cadena (23 caracteres)
+    \item Se pide por los indices \texttt{2 4 6} (el índice de 3, multiplicado por 2), de los cuales se obtiene \texttt{I}, un espacio en blanco y \texttt{R}
+    \item Se pide por los indices del 23 al 1
+  \end{enumerate}
+
 \end{frame}
 
 \begin{frame}[fragile]
@@ -176,6 +196,15 @@ $$
   36
       \end{lstlisting}
   \end{center}
+
+  \begin{enumerate}
+    \item Se asigna a V el vector \texttt{2 1 3 2 4 5 6 6 2 1}, y se imprime como una matriz de 4 filas y 5 columnas
+    \item Partiendo de V, se asigna a T un array de 3 dimensiones
+    \item Se imprime T planchado
+    \item Se pide la forma de T: 3 planos de 3 filas y 4 columnas
+    \item Se pide por las dimensiones del vector planchado: 3x3x4=36
+  \end{enumerate}
+
 \end{frame}
 
 \begin{frame}[fragile]
@@ -187,14 +216,22 @@ $$
       El promedio entre el primer número positivo de un vector V y el último número negativo del mismo.
     }
 
-      \begin{lstlisting}[
-        style=apl,
-        backgroundcolor=\color{codebackground},
-        frame=tbrl,
-        xleftmargin=0.8cm,
-        xrightmargin=0.8cm]
-  AAAA
-      \end{lstlisting}
+    \begin{lstlisting}[
+      style=apl,
+      backgroundcolor=\color{codebackground},
+      frame=tbrl,
+      xleftmargin=0.5cm,
+      xrightmargin=0.5cm]
+    V ← -4 8 -15 16 -23 42
+    FIRST_POSITIVE ← V[(×V) ⍳ 1]
+    FIRST_POSITIVE
+8
+    LAST_NEGATIVE ← (⌽V)[(⌽(×V)) ⍳ ¯1]
+    LAST_NEGATIVE
+¯23
+    (FIRST_POSITIVE + LAST_NEGATIVE) ÷ 2
+¯7.5
+    \end{lstlisting}
   \end{center}
 \end{frame}
 
