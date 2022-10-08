@@ -17,6 +17,17 @@
 \lstdefinestyle{apl}{
   extendedchars=true,
   basicstyle=\ttfamily,
+  emph={←},
+  emphstyle=\color{magenta},
+}
+
+\lstdefinestyle{fp}{
+  emph={RESULT,Def},
+  emphstyle=\color{magenta},
+  basicstyle=\ttfamily,
+  alsoletter={=},
+  morekeywords={=},
+  keywordstyle=\color{magenta},
 }
 
 \makeatletter
@@ -231,6 +242,65 @@ $$
 ¯23
     (FIRST_POSITIVE + LAST_NEGATIVE) ÷ 2
 ¯7.5
+    \end{lstlisting}
+  \end{center}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{FP - Eliminar Vacios}
+
+  \begin{center}
+
+    \enunciado{
+      Dado una lista átomos con conjuntos vacíos intermedios, devolver solamente los átomos.
+    }
+
+    \begin{lstlisting}[
+      style=fp,
+      backgroundcolor=\color{codebackground},
+      frame=tbrl,
+      xleftmargin=0.5cm,
+      xrightmargin=0.5cm]
+Def apndlst = apndr o [id, ~<>]
+Def collect = null o 1 -> 2 ; apndl
+Def ev = /collect o apndlst
+ev: <1 2 3>
+RESULT: <1, 2, 3>
+ev: <<> 1 2 3 <>>
+RESULT: <1, 2, 3>
+ev: <<> 1 <> 2 <> 3 <>>
+RESULT: <1, 2, 3>
+ev: <1>
+RESULT: <1>
+ev: <>
+RESULT: <>
+    \end{lstlisting}
+  \end{center}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{FP - 14A}
+
+  \begin{center}
+
+    \enunciado{
+      Dada una secuencia de pares ordenados donde la primera componente indica el equipo que resultó ganador y la segunda indica el perdedor y donde cada par ordenado indica un partido jugado (no hay empates) obtener los equipos invictos.
+    }
+
+    \begin{lstlisting}[
+      style=fp,
+      backgroundcolor=\color{codebackground},
+      frame=tbrl,
+      xleftmargin=0.15cm,
+      xrightmargin=0.15cm]
+Def in = /or o @eq o distl
+Def keep = in -> ~<> ; 1
+Def ganadores = @1
+Def perdedores = @2
+Def diff = ev o @keep o distr
+Def invictos = diff o [ganadores, perdedores]
+invictos: <<1 2> <2 3> <4 2>>
+RESULT: <1, 4>
     \end{lstlisting}
   \end{center}
 \end{frame}
