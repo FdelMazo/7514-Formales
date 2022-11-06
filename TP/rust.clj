@@ -3,7 +3,7 @@
 (declare listar)
 (declare buscar-mensaje)
 (declare agregar-ptocoma)
-(declare escanear) 
+(declare escanear)
 (declare dar-error)
 (declare parsear)
 (declare simb-actual)
@@ -242,7 +242,7 @@
    cod)
 )
 
-(defn escanear [amb] 
+(defn escanear [amb]
   (if (= (estado amb) :sin-errores)
       [(let [simb (first (simb-no-parseados-aun amb))]
             (if (nil? simb) 'EOF simb)) (rest (simb-no-parseados-aun amb)) (conj (simb-ya-parseados amb) (simb-actual amb)) (estado amb) (contexto amb) (prox-var amb) (bytecode amb) (mapa-regs-de-act amb)]
@@ -326,7 +326,7 @@
       amb)
 )
 
-(defn generar 
+(defn generar
   ([amb instr]
     (if (= (estado amb) :sin-errores)
         (assoc amb 6 (conj (bytecode amb) instr))
@@ -422,7 +422,7 @@
                           [(params-args simbolos-ya) ()]),
             valor (count (bytecode amb))]
            (assoc amb 4 [((contexto amb) 0)
-                         (conj ((contexto amb) 1) [nombre 
+                         (conj ((contexto amb) 1) [nombre
                                                    ['fn tipo-dato]
                                                    valor])]))
       amb)
@@ -435,7 +435,7 @@
             tipo-dato (last simbolos-ya),
             valor (prox-var amb),
             nuevo (assoc (assoc amb 4 [((contexto amb) 0)
-                                (conj ((contexto amb) 1) [nombre 
+                                (conj ((contexto amb) 1) [nombre
                                                           ['var-mut tipo-dato]
                                                           valor])]) 5 (inc valor)),
             vars (mapa-regs-de-act amb)]
@@ -450,7 +450,7 @@
             tipo-dato (last simbolos-ya),
             valor (prox-var amb),
             nuevo (assoc (assoc amb 4 [((contexto amb) 0)
-                                (conj ((contexto amb) 1) [nombre 
+                                (conj ((contexto amb) 1) [nombre
                                                           ['var-inmut tipo-dato]
                                                           valor])]) 5 (inc valor)),
             vars (mapa-regs-de-act amb)]
@@ -466,7 +466,7 @@
 
 (defn preparar-mapa-regs-de-act [amb]
   (if (= (estado amb) :sin-errores)
-      (assoc amb 7 (zipmap (map first (mapa-regs-de-act amb)) (map vec (map rest (mapa-regs-de-act amb))))) 
+      (assoc amb 7 (zipmap (map first (mapa-regs-de-act amb)) (map vec (map rest (mapa-regs-de-act amb)))))
       amb)
 )
 
@@ -476,8 +476,8 @@
           (inicializar-contexto-global)
           (generar ,,, 'CAL 0)
           (generar ,,, 'HLT)
-          (procesar-opcional-declaraciones-use)  
-          (procesar-opcional-declaraciones-const)  
+          (procesar-opcional-declaraciones-use)
+(procesar-opcional-declaraciones-const)
           (procesar-declaraciones-fn)
           (preparar-mapa-regs-de-act))
       amb)
@@ -509,7 +509,7 @@
 
 (defn procesar-opciones-use-std [amb]
   (if (= (estado amb) :sin-errores)
-      (case (simb-actual amb) 
+      (case (simb-actual amb)
              io (-> amb
                     (escanear)
                     (procesar-opcional-en-std-io))
@@ -566,7 +566,7 @@
 
 (defn procesar-tipo-param [amb]
   (if (= (estado amb) :sin-errores)
-      (case (simb-actual amb) 
+      (case (simb-actual amb)
         i64 (-> amb
                 (escanear))
         f64 (-> amb
@@ -608,7 +608,7 @@
 
 (defn procesar-tipo-retorno [amb]
   (if (= (estado amb) :sin-errores)
-      (case (simb-actual amb) 
+      (case (simb-actual amb)
            i64 (-> amb
                    (escanear))
            f64 (-> amb
@@ -658,21 +658,21 @@
                                                tipo-dato (last param),
                                                valor (prox-var amb)]
                       (assoc (assoc amb 4 [((contexto amb) 0)
-                                           (conj ((contexto amb) 1) [nombre 
+                                           (conj ((contexto amb) 1) [nombre
                                                                      ['var-inmut tipo-dato]
                                                                      valor])]) 5 (inc valor))) (rest params))
                4 (cargar-params-en-tabla (let [nombre (second param),
                                                tipo-dato (last param),
                                                valor (prox-var amb)]
                       (assoc (assoc amb 4 [((contexto amb) 0)
-                                           (conj ((contexto amb) 1) [nombre 
+                                           (conj ((contexto amb) 1) [nombre
                                                                      ['var-mut tipo-dato]
                                                                      valor])]) 5 (inc valor))) (rest params))
                5 (cargar-params-en-tabla (let [nombre (first param),
                                                tipo-dato (last param),
                                                valor (prox-var amb)]
                       (assoc (assoc amb 4 [((contexto amb) 0)
-                                           (conj ((contexto amb) 1) [nombre 
+                                           (conj ((contexto amb) 1) [nombre
                                                                      ['var-ref tipo-dato]
                                                                      valor])]) 5 (inc valor))) (rest params))))))
 )
@@ -696,7 +696,7 @@
   (if (= (estado amb) :sin-errores)
       (let [ultimo (last (bytecode amb)),
             no-simb-ult (not (symbol? ultimo))]
-            (cond 
+            (cond
                (hace-push-implicito? ultimo) amb
                (and no-simb-ult (= (first ultimo) 'PUSHFM)) amb
                (and no-simb-ult (= (first ultimo) 'PUSHFI)) amb
@@ -813,7 +813,7 @@
 
 (defn procesar-tipo-const [amb]
   (if (= (estado amb) :sin-errores)
-      (case (simb-actual amb) 
+      (case (simb-actual amb)
         i64 (-> amb
                 (escanear))
         f64 (-> amb
@@ -836,7 +836,7 @@
 
 (defn procesar-tipo-variable [amb]
   (if (= (estado amb) :sin-errores)
-      (case (simb-actual amb) 
+      (case (simb-actual amb)
         i64 (-> amb
                 (escanear))
         f64 (-> amb
@@ -878,7 +878,7 @@
 
 (defn procesar-stdout-stdin [amb]
   (if (= (estado amb) :sin-errores)
-      (case (simb-actual amb) 
+      (case (simb-actual amb)
         stdout (-> amb
                    (escanear)
                    (procesar-terminal ,,, (symbol "(") 11)
@@ -918,7 +918,7 @@
 )
 
 (defn generar-pushfi-cadena [amb]
-  (generar amb 'PUSHFI (last (simb-ya-parseados amb))) 
+  (generar amb 'PUSHFI (last (simb-ya-parseados amb)))
 )
 
 (defn procesar-opcional-cadena-expresiones-a-imprimir [amb]
@@ -934,7 +934,7 @@
 
 (defn procesar-string-new-from [amb]
   (if (= (estado amb) :sin-errores)
-      (case (simb-actual amb) 
+      (case (simb-actual amb)
          new (-> amb
                  (escanear)
                  (procesar-terminal ,,, (symbol "(") 11)
@@ -952,7 +952,7 @@
 
 (defn procesar-string-punto-as-str-trim [amb]
   (if (= (estado amb) :sin-errores)
-      (case (simb-actual amb) 
+      (case (simb-actual amb)
            as_str (-> amb
                       (escanear)
                       (procesar-as-str))
@@ -991,7 +991,7 @@
 
 (defn procesar-string-punto-to-string-parse [amb]
   (if (= (estado amb) :sin-errores)
-      (case (simb-actual amb) 
+      (case (simb-actual amb)
         to_string (-> amb
                       (escanear)
                       (procesar-to-string))
@@ -1045,7 +1045,7 @@
 
 (defn procesar-tipo-as [amb]
   (if (= (estado amb) :sin-errores)
-      (case (simb-actual amb) 
+      (case (simb-actual amb)
         i64 (-> amb
                 (escanear)
                 (generar ,,, 'TOI))
@@ -1071,7 +1071,7 @@
 
 (defn procesar-f64-funcion [amb]
   (if (= (estado amb) :sin-errores)
-      (case (simb-actual amb) 
+      (case (simb-actual amb)
         sqrt (-> amb
                 (escanear)
                 (procesar-terminal ,,, (symbol "(") 11)
@@ -1102,7 +1102,7 @@
 
 (defn procesar-ident-punto-parse-to-string [amb]
   (if (= (estado amb) :sin-errores)
-      (case (simb-actual amb) 
+      (case (simb-actual amb)
             parse (-> amb
                       (escanear)
                       (procesar-parse))
@@ -1115,7 +1115,7 @@
 
 (defn procesar-ident-punto [amb]
   (if (= (estado amb) :sin-errores)
-      (case (simb-actual amb) 
+      (case (simb-actual amb)
            as_str (-> amb
                       (escanear)
                       (procesar-as-str))
@@ -1172,7 +1172,7 @@
                (generar amb 'PUSHFI valor)
                (if (not puntero?)
                    (generar amb 'PUSHFM valor)
-                   (generar amb 'PUSHREF valor))))      
+                   (generar amb 'PUSHREF valor))))
       amb)
 )
 
@@ -1295,7 +1295,7 @@
               (procesar-terminal ,,, (symbol ")") 12)
               (procesar-opcional-as-punto))
         :else
-           (case (simb-actual amb) 
+           (case (simb-actual amb)
                if (let [primera-fase (-> amb
                                          (escanear)
                                          (expresion))]
@@ -1405,7 +1405,7 @@
 
 (defn expresion-unaria  [amb]
   (if (= (estado amb) :sin-errores)
-      (case (simb-actual amb) 
+      (case (simb-actual amb)
          + (-> amb
                (escanear)
                (expresion-atomica))
@@ -1423,7 +1423,7 @@
 
 (defn procesar-mas-expresion-unaria [amb]
   (if (= (estado amb) :sin-errores)
-      (case (simb-actual amb) 
+      (case (simb-actual amb)
          * (-> amb
                (escanear)
                (expresion-unaria)
@@ -1453,7 +1453,7 @@
 
 (defn procesar-mas-expresion-multiplicativa [amb]
   (if (= (estado amb) :sin-errores)
-      (case (simb-actual amb) 
+      (case (simb-actual amb)
          + (-> amb
                (escanear)
                (expresion-multiplicativa)
@@ -1478,7 +1478,7 @@
 
 (defn procesar-mas-expresion-aditiva [amb]
   (if (= (estado amb) :sin-errores)
-      (case (simb-actual amb) 
+      (case (simb-actual amb)
          <= (-> amb
                 (escanear)
                 (expresion-aditiva)
@@ -1513,7 +1513,7 @@
 
 (defn procesar-mas-expresion-relacional [amb]
   (if (= (estado amb) :sin-errores)
-      (case (simb-actual amb) 
+      (case (simb-actual amb)
          != (-> amb
                 (escanear)
                 (expresion-relacional)
@@ -1578,7 +1578,7 @@
 
 (defn generar-operador-relacional [amb operador]
   (if (= (estado amb) :sin-errores)
-      (case operador 
+      (case operador
          = (generar amb 'EQ)
         <> (generar amb 'NEQ)
          > (generar amb 'GT)
@@ -1617,8 +1617,8 @@
    (let [direc (second fetched),
          tipo-en-reg (first (reg-actual direc)),
          dato-en-reg (second (reg-actual direc)),
-         dato-en-pila (last pila)] 
-         (if (compatibles? tipo-en-reg dato-en-pila) 
+         dato-en-pila (last pila)]
+         (if (compatibles? tipo-en-reg dato-en-pila)
              (cargar-en-ult-reg regs-de-act direc tipo-en-reg (op dato-en-reg dato-en-pila))
              (do (print "ERROR: ") (println (buscar-mensaje 50)) nil)))
 )
@@ -1628,8 +1628,8 @@
          destino (second (reg-actual direc)),
          dato-en-pila (last pila),
          dato-en-dest (second ((regs-de-act (first destino)) (second destino)))
-         tipo-en-dest (first ((regs-de-act (first destino)) (second destino)))] 
-         (if (compatibles? tipo-en-dest dato-en-pila) 
+         tipo-en-dest (first ((regs-de-act (first destino)) (second destino)))]
+         (if (compatibles? tipo-en-dest dato-en-pila)
              (cargar-en-reg-dest regs-de-act destino tipo-en-dest (op dato-en-dest dato-en-pila))
              (do (print "ERROR: ") (println (buscar-mensaje 50)) nil)))
 )
@@ -1670,7 +1670,7 @@
 )
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-; LA SIGUIENTE FUNCION DEBERA SER COMPLETADA PARA QUE ANDE EL INTERPRETE DE RUST 
+; LA SIGUIENTE FUNCION DEBERA SER COMPLETADA PARA QUE ANDE EL INTERPRETE DE RUST
 ; FALTAN IMPLEMENTAR (todas como llamados recursivos a la funcion interpretar, con recur y argumentos actualizados):
 ;
 ; PUSHFI: PUSH FROM INSTRUCTION. Direccionamiento inmediato. Incrementa cont-prg en 1 y agrega al final de pila el valor del argumento.
@@ -1681,15 +1681,15 @@
 ; RETN: Indica el retorno de la llamada a un procedimiento (no funcion). Llama recursivamente a interpretar con valores actualizados de regs-de-act (se elimina el ultimo de ellos), cont-prg (pasa a ser el ultimo valor en la pila) y pila (se quita de ella el nuevo cont-prg).
 ; NL: New line. Imprime un salto de linea e incrementa cont-prg en 1.
 ; FLUSH: Purga la salida e incrementa cont-prg en 1.
-; POPSUB: Como POPADD, pero resta. 
+; POPSUB: Como POPADD, pero resta.
 ; POPMUL: Como POPADD, pero multiplica.
 ; POPDIV: Como POPADD, pero divide.
 ; POPMOD: Como POPADD, pero calcula el resto de la division.
-; POPSUBREF: Como POPADDREF, pero resta. 
+; POPSUBREF: Como POPADDREF, pero resta.
 ; POPMULREF: Como POPADDREF, pero multiplica.
 ; POPDIVREF: Como POPADDREF, pero divide.
 ; POPMODREF: Como POPADDREF, pero calcula el resto de la division.
-; SUB: Como ADD, pero resta. 
+; SUB: Como ADD, pero resta.
 ; MUL: Como ADD, pero multiplica.
 ; DIV: Como ADD, pero divide.
 ; MOD: Como ADD, pero calcula el resto de la division.
@@ -1721,7 +1721,7 @@
           HLT nil
 
           ; Incrementa cont-prg en 1 y agrega al final de pila un valor proveniente de regs-de-act cuyas coordenadas [#reg-act, offset] provienen de reg-actual.
-          ; Por ejemplo: 
+          ; Por ejemplo:
           ; fetched: [PUSHREF 3]
           ; reg-actual: [[i64 23] [i64 5] [i64 [0 3]] [i64 [0 4]] [i64 nil] [i64 nil]]
           ;                                         3:^^^^^^^^^^^
@@ -1731,11 +1731,11 @@
           ;             0:^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
           ; pila recibida: [1 150]
           ; pila al llamar recursivamente a interpretar: [1 150 23]
-          PUSHREF (let [destino (second (reg-actual (second fetched)))] 
+          PUSHREF (let [destino (second (reg-actual (second fetched)))]
                     (recur cod regs-de-act (inc cont-prg) (conj pila (second ((regs-de-act (first destino)) (second destino)))) mapa-regs))
-                    
+
           ; Incrementa cont-prg en 1 y agrega al final de pila unas coordenadas [#reg-act, offset]
-          ; Por ejemplo: 
+          ; Por ejemplo:
           ; fetched: [PUSHADDR 3]
           ; reg-actual: [[String "5"] [i64 23] [i64 5] [i64 0] [i64 0]]
           ; regs-de-act: [[[String "5"] [i64 23] [i64 5] [i64 0] [i64 0]]]
@@ -1746,7 +1746,7 @@
 
           ; Incrementa cont-prg en 1 y quita el ultimo elemento de pila. Si hay un argumento, este indica donde colocar el elemento en el ultimo de los regs-de-act al llamar recursivamente a interpretar (verificando la compatibilidad de los tipos)
           ; Si no lo hay, solo incrementa cont-prg en 1 y quita el elemento de la pila.
-          ; Por ejemplo: 
+          ; Por ejemplo:
           ; fetched: [POP 4]
           ; regs-de-act recibido: [[[String "5"] [i64 23] [i64 5] [i64 0] [i64 23]] [[i64 23] [i64 5] [i64 [0 3]] [i64 [0 4]] [i64 nil] [i64 nil]]]
           ; reg-actual: [[i64 23] [i64 5] [i64 [0 3]] [i64 [0 4]] [i64 nil] [i64 nil]]
@@ -1759,13 +1759,13 @@
                   (recur cod regs-de-act (inc cont-prg) (vec (butlast pila)) mapa-regs)
                   (let [direc (second fetched),
                         tipo-en-reg (first (reg-actual direc)),
-                        dato-en-pila (last pila)] 
-                       (if (compatibles? tipo-en-reg dato-en-pila) 
+                        dato-en-pila (last pila)]
+                       (if (compatibles? tipo-en-reg dato-en-pila)
                            (recur cod (cargar-en-ult-reg regs-de-act direc tipo-en-reg dato-en-pila) (inc cont-prg) (vec (butlast pila)) mapa-regs)
                            (do (print "ERROR: ") (println (buscar-mensaje 50)) nil))))
 
           ; Incrementa cont-prg en 1 y quita el penultimo elemento de pila. El argumento indica donde colocar el elemento en el ultimo de los regs-de-act al llamar recursivamente a interpretar (verificando la compatibilidad de los tipos)
-          ; Por ejemplo: 
+          ; Por ejemplo:
           ; fetched: [POPARG 3]
           ; regs-de-act recibido: [[[String "5"] [i64 23] [i64 5] [i64 0] [i64 0]] [[i64 nil] [i64 nil] [i64 nil] [i64 nil] [i64 nil] [i64 nil]]]
           ; reg-actual: [[i64 nil] [i64 nil] [i64 nil] [i64 nil] [i64 nil] [i64 nil]]
@@ -1776,13 +1776,13 @@
           ;                                                                                                                                   3:^^^^^^^^^^^
           POPARG (let [direc (second fetched),
                     tipo-en-reg (first (reg-actual direc)),
-                    dato-en-pila (last (butlast pila))] 
-                   (if (compatibles? tipo-en-reg dato-en-pila) 
+                    dato-en-pila (last (butlast pila))]
+                   (if (compatibles? tipo-en-reg dato-en-pila)
                        (recur cod (cargar-en-ult-reg regs-de-act direc tipo-en-reg dato-en-pila) (inc cont-prg) (conj (vec (drop-last 2 pila)) (last pila)) mapa-regs)
                        (do (print "ERROR: ") (println (buscar-mensaje 50)) nil)))
 
           ; Incrementa cont-prg en 1 y quita el ultimo elemento de pila. El argumento indica en reg-actual las coordenadas [#reg-act, offset] donde colocar el elemento en regs-de-act al llamar recursivamente a interpretar (verificando la compatibilidad de los tipos)
-          ; Por ejemplo: 
+          ; Por ejemplo:
           ; fetched: [POPREF 3]
           ; regs-de-act recibido: [[[String "5"] [i64 23] [i64 5] [i64 0] [i64 0]] [[i64 23] [i64 5] [i64 [0 3]] [i64 [0 4]] [i64 nil] [i64 nil]]]
           ; reg-actual: [[i64 23] [i64 5] [i64 [0 3]] [i64 [0 4]] [i64 nil] [i64 nil]]
@@ -1795,13 +1795,13 @@
           POPREF (let [direc (second fetched),
                        destino (second (reg-actual direc)),
                        dato-en-pila (last pila),
-                       tipo-en-dest (first ((regs-de-act (first destino)) (second destino)))] 
-                       (if (compatibles? tipo-en-dest dato-en-pila) 
+                       tipo-en-dest (first ((regs-de-act (first destino)) (second destino)))]
+                       (if (compatibles? tipo-en-dest dato-en-pila)
                            (recur cod (cargar-en-reg-dest regs-de-act destino tipo-en-dest dato-en-pila) (inc cont-prg) (vec (butlast pila)) mapa-regs)
                            (do (print "ERROR: ") (println (buscar-mensaje 50)) nil)))
 
           ; Incrementa cont-prg en 1, lee un string desde el teclado y lo coloca en el ultimo de los regs-de-act al llamar recursivamente a interpretar
-          ; Por ejemplo: 
+          ; Por ejemplo:
           ; fetched: [IN 0]
           ; regs-de-act recibido: [[[String ""] [i64 23] [i64 nil] [i64 nil] [i64 nil]]]
           ; reg-actual: [[String ""] [i64 23] [i64 nil] [i64 nil] [i64 nil]]
@@ -1811,7 +1811,7 @@
                   (recur cod (cargar-en-ult-reg regs-de-act (second fetched) 'String entr) (inc cont-prg) pila mapa-regs))
 
           ; Incrementa cont-prg en 1, quita de la pila el contador de argumentos y los argumentos, y coloca al final de la pila un string con estos ultimos (correctamente formateados)
-          ; Por ejemplo: 
+          ; Por ejemplo:
           ; fetched: FMT
           ; pila recibida: [1 153 "Resto: {}" 9 2]
           ; pila: [1 153 "Resto: 9"]
@@ -1821,11 +1821,11 @@
                    (recur cod regs-de-act (inc cont-prg) (conj (vec (drop-last (+ cant-args 1) pila)) res) mapa-regs))
 
           ; Incrementa cont-prg en 1, quita de la pila el contador de argumentos y los argumentos, e imprime estos ultimos (correctamente formateados)
-          ; Por ejemplo: 
+          ; Por ejemplo:
           ; fetched: OUT
           ; pila recibida: [1 153 "Resto: {}" 9 2]
           ; pila: [1 153]
-          ; Imprime: 
+          ; Imprime:
           ;          Resto: 9
           OUT (let [cant-args (last pila),
                     args (take-last cant-args (butlast pila))]
@@ -1833,7 +1833,7 @@
                        (recur cod regs-de-act (inc cont-prg) (vec (drop-last (+ cant-args 1) pila)) mapa-regs)))
 
           ; Indica el retorno de la llamada a una funcion (no procedimiento). Llama recursivamente a interpretar con valores actualizados de regs-de-act (se elimina el ultimo de ellos), cont-prg (pasa a ser el penultimo valor en la pila) y pila (se quita de ella el nuevo cont-prg).
-          ; Por ejemplo: 
+          ; Por ejemplo:
           ; fetched: RET
           ; regs-de-act recibido: [[[String "15"] [i64 12] [i64 15]] [[i64 3] [i64 3]]]
           ; cont-prg recibido: 40
@@ -1845,7 +1845,7 @@
 
 
           ; Incrementa cont-prg en 1 y quita el ultimo elemento de pila. El argumento indica donde sumar el elemento en el ultimo de los regs-de-act al llamar recursivamente a interpretar (verificando la compatibilidad de los tipos)
-          ; Por ejemplo: 
+          ; Por ejemplo:
           ; fetched: [POPADD 2]
           ; regs-de-act recibido: [[[String "6"] [i64 6] [i64 5]]]
           ; reg-actual: [[String "6"] [i64 6] [i64 5]]
@@ -1858,7 +1858,7 @@
                       (if (nil? res) res (recur cod res (inc cont-prg) (vec (butlast pila)) mapa-regs)))
 
           ; Incrementa cont-prg en 1 y quita el ultimo elemento de pila. El argumento indica en reg-actual las coordenadas [#reg-act, offset] donde sumar el elemento en regs-de-act al llamar recursivamente a interpretar (verificando la compatibilidad de los tipos)
-          ; Por ejemplo: 
+          ; Por ejemplo:
           ; fetched: [POPADDREF 2]
           ; regs-de-act recibido: [[[String "5"] [i64 23] [i64 5] [i64 0] [i64 3]] [[i64 23] [i64 5] [i64 [0 3]] [i64 [0 4]] [i64 5] [i64 20]]]
           ; reg-actual: [[i64 23] [i64 5] [i64 [0 3]] [i64 [0 4]] [i64 5] [i64 20]]
@@ -1871,7 +1871,7 @@
           POPADDREF (let [res (asignar-aritmetico-ref regs-de-act pila reg-actual fetched +)]
                          (if (nil? res) res (recur cod res (inc cont-prg) (vec (butlast pila)) mapa-regs)))
 
-          ; Incrementa cont-prg en 1, quita de la pila dos elementos, calcula su suma y la coloca al final de la pila 
+          ; Incrementa cont-prg en 1, quita de la pila dos elementos, calcula su suma y la coloca al final de la pila
           ; fetched: ADD
           ; pila recibida: [1 0 0 3 4]
           ; pila al llamar recursivamente a interpretar: [1 0 0 7]
@@ -1883,7 +1883,7 @@
 )
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-; LAS FUNCIONES QUE SIGUEN DEBERAN SER IMPLEMENTADAS PARA QUE ANDE EL INTERPRETE DE RUST 
+; LAS FUNCIONES QUE SIGUEN DEBERAN SER IMPLEMENTADAS PARA QUE ANDE EL INTERPRETE DE RUST
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -1894,7 +1894,7 @@
 ; {
 ;   println! ( "Hola, mundo!" )
 ; }
-; 
+;
 ; nil
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defn listar
@@ -1985,17 +1985,17 @@
 )
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-; CARGAR-CONST-EN-TABLA: Recibe un ambiente 
+; CARGAR-CONST-EN-TABLA: Recibe un ambiente
 ; [simb-actual  simb-no-parseados-aun  simb-ya-parseados  estado  contexto  prox-var  bytecode mapa-regs-de-act]
 ; Si su estado no es :sin-errores, lo devuelve intacto. De lo contrario, lo devuelve modificado con la constante
 ; declarada como terna [identificador, tipo, valor] en el segundo subvector del vector contexto.
 ; Por ejemplo:
 ; user=> (cargar-const-en-tabla [(symbol ";") (list 'fn 'main (symbol "(") (symbol ")") (symbol "{") 'println! (symbol "(") "{}" (symbol ",") 'TRES (symbol ")") (symbol "}")) ['use 'std (symbol "::") 'io (symbol ";") 'const 'TRES (symbol ":") 'i64 (symbol "=") 3] 8 [[0] [['io ['lib '()] 0]]] 0 [['CAL 0] 'HLT] []])
 ; [; (fn main ( ) { println! ( "{}" , TRES ) }) [use std :: io ; const TRES : i64 = 3] 8 [[0] [[io [lib ()] 0]]] 0 [[CAL 0] HLT] []]
-;                                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ ^ ^^^^^^^^^^^^^^^^^^^^^^^ 
+;                                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ ^ ^^^^^^^^^^^^^^^^^^^^^^^
 ; user=> (cargar-const-en-tabla [(symbol ";") (list 'fn 'main (symbol "(") (symbol ")") (symbol "{") 'println! (symbol "(") "{}" (symbol ",") 'TRES (symbol ")") (symbol "}")) ['use 'std (symbol "::") 'io (symbol ";") 'const 'TRES (symbol ":") 'i64 (symbol "=") 3] :sin-errores [[0] [['io ['lib '()] 0]]] 0 [['CAL 0] 'HLT] []])
 ; [; (fn main ( ) { println! ( "{}" , TRES ) }) [use std :: io ; const TRES : i64 = 3] :sin-errores [[0] [[io [lib ()] 0] [TRES [const i64] 3]]] 0 [[CAL 0] HLT] []]
-;                                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ ^^^^^^^^^^^^ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ 
+;                                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ ^^^^^^^^^^^^ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defn cargar-const-en-tabla
 
@@ -2008,7 +2008,7 @@
 ; Por ejemplo:
 ; user=> (inicializar-contexto-local [(symbol "{") (list 'let 'x (symbol ":") 'i64 (symbol "=") 10 (symbol ";") 'println! (symbol "(") "{}" (symbol ",") 'x (symbol ")") (symbol "}")) ['fn 'main (symbol "(") (symbol ")")] 8 [[0] [['main ['fn [() ()]] 2]]] 0 [['CAL 2] 'HLT] []])
 ; [{ (let x : i64 = 10 ; println! ( "{}" , x ) }) [fn main ( )] 8 [[0] [[main [fn [() ()]] 2]]] 0 [[CAL 2] HLT] []]
-;                                                               ^ 
+;                                                               ^
 ; user=> (inicializar-contexto-local [(symbol "{") (list 'let 'x (symbol ":") 'i64 (symbol "=") 10 (symbol ";") 'println! (symbol "(") "{}" (symbol ",") 'x (symbol ")") (symbol "}")) ['fn 'main (symbol "(") (symbol ")")] :sin-errores [[0] [['main ['fn [() ()]] 2]]] 0 [['CAL 2] 'HLT] []])
 ; [{ (let x : i64 = 10 ; println! ( "{}" , x ) }) [fn main ( )] :sin-errores [[0 1] [[main [fn [() ()]] 2]]] 0 [[CAL 2] HLT] []]
 ;                                                               ^^^^^^^^^^^^     ^  ^^^^^^^^^^^^^^^^^^^^^^^
@@ -2024,7 +2024,7 @@
 ; Por ejemplo:
 ; user=> (restaurar-contexto-anterior ['EOF () ['fn 'main (symbol "(") (symbol ")") (symbol "{") 'let 'x (symbol ":") 'i64 (symbol "=") 10 (symbol ";") 'let 'y (symbol ":") 'i64 (symbol "=") 20 (symbol ";") 'println! (symbol "(") "{}" (symbol ",") 'x '+ 'y (symbol ")") (symbol "}")] 8 [[0 1] [['main ['fn [() ()]] 2] ['x ['var-inmut 'i64] 0] ['y ['var-inmut 'i64] 1]]] 2 [['CAL 2] 'HLT ['PUSHFI 10] ['POP 0] ['PUSHFI 20] ['POP 1] ['PUSHFI "{}"] ['PUSHFM 0] ['PUSHFM 1] 'ADD ['PUSHFI 2] 'OUT 'NL] [[2 ['i64 nil] ['i64 nil]]]])
 ; [EOF () [fn main ( ) { let x : i64 = 10 ; let y : i64 = 20 ; println! ( "{}" , x + y ) }] 8 [[0 1] [[main [fn [() ()]] 2] [x [var-inmut i64] 0] [y [var-inmut i64] 1]]] 2 [[CAL 2] HLT [PUSHFI 10] [POP 0] [PUSHFI 20] [POP 1] [PUSHFI "{}"] [PUSHFM 0] [PUSHFM 1] ADD [PUSHFI 2] OUT NL] [[2 [i64 nil] [i64 nil]]]]
-;                                                                                           ^ 
+;                                                                                           ^
 ; user=> (restaurar-contexto-anterior ['EOF () ['fn 'main (symbol "(") (symbol ")") (symbol "{") 'let 'x (symbol ":") 'i64 (symbol "=") 10 (symbol ";") 'let 'y (symbol ":") 'i64 (symbol "=") 20 (symbol ";") 'println! (symbol "(") "{}" (symbol ",") 'x '+ 'y (symbol ")") (symbol "}")] :sin-errores [[0 1] [['main ['fn [() ()]] 2] ['x ['var-inmut 'i64] 0] ['y ['var-inmut 'i64] 1]]] 2 [['CAL 2] 'HLT ['PUSHFI 10] ['POP 0] ['PUSHFI 20] ['POP 1] ['PUSHFI "{}"] ['PUSHFM 0] ['PUSHFM 1] 'ADD ['PUSHFI 2] 'OUT 'NL] [[2 ['i64 nil] ['i64 nil]]]])
 ; [EOF () [fn main ( ) { let x : i64 = 10 ; let y : i64 = 20 ; println! ( "{}" , x + y ) }] :sin-errores [[0] [[main [fn [() ()]] 2]]] 2 [[CAL 2] HLT [PUSHFI 10] [POP 0] [PUSHFI 20] [POP 1] [PUSHFI "{}"] [PUSHFM 0] [PUSHFM 1] ADD [PUSHFI 2] OUT NL] [[2 [i64 nil] [i64 nil]]]]
 ;                                                                                           ^^^^^^^^^^^^  ^^^ ^^^^^^^^^^^^^^^^^^^^^^^
@@ -2073,7 +2073,7 @@
 ; Por ejemplo:
 ; user=> (fixup [(symbol "{") (list 'x '= 20 (symbol ";") (symbol "}") (symbol ";") 'println! (symbol "(") "{}" (symbol ",") 'x (symbol ")") (symbol "}")) ['fn 'main (symbol "(") (symbol ")") (symbol "{") 'let 'x (symbol ":") 'i64 (symbol ";") 'if false (symbol "{") 'x '= 10 (symbol ";") (symbol "}") 'else] 8 [[0 1 2] [['main ['fn [() ()]] 2] ['x ['var-inmut 'i64] 0]]] 1 [['CAL 2] 'HLT ['PUSHFI false] ['JC 5] ['JMP '?] ['PUSHFI 10] ['POP 0] ['JMP '?]] [[2 ['i64 nil]]]] 4)
 ; [{ (x = 20 ; } ; println! ( "{}" , x ) }) [fn main ( ) { let x : i64 ; if false { x = 10 ; } else] 8 [[0 1 2] [[main [fn [() ()]] 2] [x [var-inmut i64] 0]]] 1 [[CAL 2] HLT [PUSHFI false] [JC 5] [JMP ?] [PUSHFI 10] [POP 0] [JMP ?]] [[2 [i64 nil]]]]
-;                                                                                                    ^ 
+;                                                                                                    ^
 ; user=> (fixup [(symbol "{") (list 'x '= 20 (symbol ";") (symbol "}") (symbol ";") 'println! (symbol "(") "{}" (symbol ",") 'x (symbol ")") (symbol "}")) ['fn 'main (symbol "(") (symbol ")") (symbol "{") 'let 'x (symbol ":") 'i64 (symbol ";") 'if false (symbol "{") 'x '= 10 (symbol ";") (symbol "}") 'else] :sin-errores [[0 1 2] [['main ['fn [() ()]] 2] ['x ['var-inmut 'i64] 0]]] 1 [['CAL 2] 'HLT ['PUSHFI false] ['JC 5] ['JMP '?] ['PUSHFI 10] ['POP 0] ['JMP '?]] [[2 ['i64 nil]]]] 4)
 ; [{ (x = 20 ; } ; println! ( "{}" , x ) }) [fn main ( ) { let x : i64 ; if false { x = 10 ; } else] :sin-errores [[0 1 2] [[main [fn [() ()]] 2] [x [var-inmut i64] 0]]] 1 [[CAL 2] HLT [PUSHFI false] [JC 5] [JMP 8] [PUSHFI 10] [POP 0] [JMP ?]] [[2 [i64 nil]]]]
 ;                                                                                                    ^^^^^^^^^^^^                                                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^: tamano 8                                                                                                                                                                                                                                        ^ ubicacion de JMP ? en contexto
@@ -2207,7 +2207,7 @@
 ; CARGAR-EN-REG-DEST: Recibe un vector de registros de activacion, coordenadas, un tipo y un valor. Devuelve el
 ; vector de registros de activacion con el registro indicado por las coordenadas actualizado, con el nuevo tipo
 ; y el nuevo valor.
-; 
+;
 ; Por ejemplo:
 ; user=> (cargar-en-reg-dest [[['String "2"] ['i64 6] ['i64 2] ['i64 2] ['i64 2]] [['i64 6] ['i64 2] ['i64 [0 3]] ['i64 [0 4]] ['i64 2] ['i64 2]]] [0 4] 'i64 0)
 ; [[[String "2"] [i64 6] [i64 2] [i64 2] [i64 0]] [[i64 6] [i64 2] [i64 [0 3]] [i64 [0 4]] [i64 2] [i64 2]]]
