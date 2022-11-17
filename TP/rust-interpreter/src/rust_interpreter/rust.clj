@@ -1735,7 +1735,7 @@
           ; pila al llamar recursivamente a interpretar: [1 "{} es el MCD entre " 3]
       RET (recur cod (vec (butlast regs-de-act)) (last (butlast pila)) (vec (conj (vec (drop-last 2 pila)) (last pila))) mapa-regs)
 
-; Incrementa cont-prg en 1 y quita el ultimo elemento de pila. El argumento indica donde sumar el elemento en el ultimo de los regs-de-act al llamar recursivamente a interpretar (verificando la compatibilidad de los tipos)
+          ; Incrementa cont-prg en 1 y quita el ultimo elemento de pila. El argumento indica donde sumar el elemento en el ultimo de los regs-de-act al llamar recursivamente a interpretar (verificando la compatibilidad de los tipos)
           ; Por ejemplo:
           ; fetched: [POPADD 2]
           ; regs-de-act recibido: [[[String "6"] [i64 6] [i64 5]]]
@@ -1784,8 +1784,10 @@
 ;
 ; nil
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(defn listar [& args]
-  (println "FIX ME"))
+(defn listar [tokens]
+  (println "FIX ME (formatting)")
+  (println tokens))
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; AGREGAR-PTOCOMA: Recibe una lista con los tokens de un programa en Rust y la devuelve con un token ; insertado a continuacion de ciertas } (llaves de cierre, pero no a continuacion de todas ellas).
@@ -1807,8 +1809,18 @@
 ; user=> (palabra-reservada? 13)
 ; false
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(defn palabra-reservada? []
-  (println "FIX ME"))
+
+; https://doc.rust-lang.org/reference/keywords.html
+(def KEYWORDS #{'as 'break 'const 'continue 'crate 'else 'enum 'extern 'false
+                'fn 'for 'if 'impl 'in 'let 'loop 'match 'mod 'move 'mut 'pub
+                'ref 'return 'self 'Self 'static 'struct 'super 'trait 'true
+                'type 'unsafe 'use 'where 'while
+                'async 'await 'dyn
+                'abstract 'become 'box 'do 'final 'macro 'override 'priv 'typeof 'unsized 'virtual 'yield
+                'try
+                'union})
+(defn palabra-reservada? [token]
+  (contains? KEYWORDS token))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; IDENTIFICADOR?: Recibe un elemento y devuelve true si es un identificador valido en Rust; si no, false.
@@ -1822,8 +1834,14 @@
 ; user=> (identificador? '12e0)
 ; false
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(defn identificador? []
-  (println "FIX ME"))
+
+(defn identificador? [token]
+  (let [c (first (str token))]
+    (and
+     (not (palabra-reservada? token))
+     (or
+      (= \_ c)
+      (Character/isLetter c)))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; DUMP: Recibe un vector con instrucciones de la RI y las imprime numeradas a partir de 0. Siempre devuelve nil.
@@ -2036,8 +2054,11 @@
 ; user=> (pasar-a-int [10.0])
 ; [10.0]
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(defn pasar-a-int []
-  (println "FIX ME"))
+(defn pasar-a-int [token]
+  (cond
+    (number? token) (bigint token)
+    (string? token) (let [n (read-string token)] (if (number? n) (bigint n) token))
+    :else token))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; PASAR-A-FLOAT: Recibe un elemento. Si puede devolverlo expresado como un numero de punto flotante, lo hace. Si no,
@@ -2054,8 +2075,11 @@
 ; user=> (pasar-a-float [10])
 ; [10]
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(defn pasar-a-float []
-  (println "FIX ME"))
+(defn pasar-a-float [token]
+  (cond
+    (number? token) (float token)
+    (string? token) (let [n (read-string token)] (if (number? n) (float n) token))
+    :else token))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; CARGAR-EN-ULT-REG: Recibe un vector de registros de activacion, una direccion, un tipo y un valor. Devuelve el
