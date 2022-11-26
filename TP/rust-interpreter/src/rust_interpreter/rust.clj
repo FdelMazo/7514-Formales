@@ -2009,8 +2009,19 @@
 ; user=> (convertir-formato-impresion '("Las raices cuadradas de {} son +{:.8} y -{:.8}" 4.0 1.999999999985448 1.999999999985448))
 ; ("Las raices cuadradas de %.0f son +%.8f y -%.8f" 4.0 1.999999999985448 1.999999999985448)
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(defn convertir-formato-impresion []
-  (println "FIX ME"))
+(use '[clojure.string :only (replace-first)])
+(defn convertir-formato-impresion [args]
+  (let [template (first args)
+        print-args (rest args)]
+    (if (empty? print-args) (list template)
+        (loop [template template
+               rest-print-args print-args]
+          (let [arg (first rest-print-args)]
+            (cond
+              (nil? arg) (apply list template print-args)
+              (int? arg) (recur (replace-first template "{}" "%d") (rest rest-print-args))
+              (float? arg) (recur (replace-first (replace-first template "{}" "%.0f") #"\{:(\.\d)\}" "%$1f") (rest rest-print-args))
+              :else (recur (replace-first template "{}" "%s") (rest rest-print-args))))))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; DIVIDIR: Recibe dos numeros y devuelve su cociente, manteniendo su tipo.

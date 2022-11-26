@@ -91,6 +91,21 @@
     (is (= 0   (dividir 1 2)))
     (is (= 0.5 (dividir 1 2.0)))))
 
+(deftest convertir-formato-impresion-test
+  (testing "Prueba de la función: convertir-formato-impresion"
+    (is (=
+         '("Hola, mundo!")
+         (convertir-formato-impresion '("Hola, mundo!"))))
+    (is (=
+         '("- My name is %s, James %s.\n- Hello, %d%d%d!" "Bond" "Bond" 0 0 7)
+         (convertir-formato-impresion '("- My name is {}, James {}.\n- Hello, {}{}{}!" "Bond" "Bond" 0 0 7))))
+    (is (=
+         '("%.0f elevado a la %d es\t%.0f" 2.0 2 4.0)
+         (convertir-formato-impresion '("{} elevado a la {} es\t{}" 2.0 2 4.0))))
+    (is (=
+         '("Las raices cuadradas de %.0f son +%.8f y -%.8f" 4.0 1.999999999985448 1.999999999985448)
+         (convertir-formato-impresion '("Las raices cuadradas de {} son +{:.8} y -{:.8}" 4.0 1.999999999985448 1.999999999985448))))))
+
 ;; (deftest agregar-ptocoma-test
 ;;   (testing "Prueba de la función: agregar-ptocoma"
 ;;     (is (= "(fn main ( ) { if x < 0 { x = - x ; } ; renglon = x ; if z < 0 { z = - z ; } } fn foo ( ) { if y > 0 { y = - y ; } else { x = - y ; } })"
