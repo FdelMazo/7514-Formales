@@ -2028,8 +2028,10 @@
 ; user=> (dividir 1 2.0)
 ; 0.5
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(defn dividir []
-  (println "FIX ME"))
+(defn dividir [a b]
+  (cond
+    (and (integer? a) (integer? b)) (pasar-a-int (/ a b))
+    (or (float? a) (float? b)) (pasar-a-float (/ a b))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; COMPATIBLES?: Recibe dos elementos. Si el primero es un tipo de dato de Rust y el segundo es un valor de Clojure
@@ -2076,9 +2078,8 @@
 ; [10.0]
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defn pasar-a-int [token]
-  (cond
-    (number? token) (bigint token)
-    (string? token) (let [n (read-string token)] (if (number? n) (bigint n) token))
+  (cond (numero? token) (bigint token)
+    (cadena? token) (let [n (read-string token)] (if (numero? n) (bigint n) token))
     :else token))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -2097,9 +2098,8 @@
 ; [10]
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defn pasar-a-float [token]
-  (cond
-    (number? token) (float token)
-    (string? token) (let [n (read-string token)] (if (number? n) (float n) token))
+  (cond (numero? token) (float token)
+    (cadena? token) (let [n (read-string token)] (if (numero? n) (float n) token))
     :else token))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
