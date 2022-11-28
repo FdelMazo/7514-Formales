@@ -1788,14 +1788,16 @@
     (loop [level 0
            tokens tokens]
       (if (seq tokens)
-        (let [token (first tokens)]
+        (let [token (first tokens)
+              ident (fn [level] (apply str (repeat level "  ")))]
           (cond
             (= (symbol "{") token) (do
-              (print (apply str "\n" token "\n"))
-              (print (apply str (repeat (+ 1 level) "  ")))
+              (print (apply str "\n" (ident level) token "\n"))
+(print (ident (inc level)))
               (recur (inc level) (rest tokens)))
             (= (symbol "}") token) (do
-              (print (apply str "\n" token "\n"))
+              (print (apply str "\n" (ident (dec level)) token "\n"))
+(print (ident (dec level)))
               (recur (dec level) (rest tokens)))
             :else (do
                 (print token "")
@@ -1807,9 +1809,30 @@
 ; user=> (agregar-ptocoma (list 'fn 'main (symbol "(") (symbol ")") (symbol "{") 'if 'x '< '0 (symbol "{") 'x '= '- 'x (symbol ";") (symbol "}") 'renglon '= 'x (symbol ";") 'if 'z '< '0 (symbol "{") 'z '= '- 'z (symbol ";") (symbol "}") (symbol "}") 'fn 'foo (symbol "(") (symbol ")") (symbol "{") 'if 'y '> '0 (symbol "{") 'y '= '- 'y (symbol ";") (symbol "}") 'else (symbol "{") 'x '= '- 'y (symbol ";") (symbol "}") (symbol "}")))
 ; (fn main ( ) { if x < 0 { x = - x ; } ; renglon = x ; if z < 0 { z = - z ; } } fn foo ( ) { if y > 0 { y = - y ; } else { x = - y ; } })
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(defn is-close-brace? [tokens idx]
+  (if (= idx (dec (count tokens))) false
+      (let [next-word (nth tokens (inc idx))]
+        (cond
+          (= (symbol "else") next-word) false
+          (= (symbol "}") next-word) false
+          (= (symbol ")") next-word) false
+          (= (symbol "fn") next-word) false
+          :else true))))
+
 (defn agregar-ptocoma [tokens]
-  (println "FIX ME (ptocoma)")
-  tokens)
+  (let [llaves-idx (keep-indexed #(if (= (symbol "}") %2) %1) tokens)]
+    (loop [agregados 0
+           rest-llaves-idx llaves-idx
+           tokens tokens]
+      (if (seq rest-llaves-idx)
+        (let [llave-idx (first rest-llaves-idx)
+              insert-token (fn [token idx]
+                       (let [[l r] (split-at (inc idx) tokens)]
+                         (concat l [token] r)))]
+          (if (is-close-brace? tokens (+ llave-idx agregados))
+            (recur (inc agregados) (rest rest-llaves-idx) (insert-token (symbol ";") (+ llave-idx agregados)))
+            (recur agregados (rest rest-llaves-idx) tokens)))
+          tokens))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; PALABRA-RESERVADA?: Recibe un elemento y devuelve true si es una palabra reservada de Rust; si no, false.
@@ -1873,8 +1896,15 @@
 ; 0 nil
 ; nil
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(defn dump []
-  (println "FIX ME"))
+(defn dump [instrs]
+  (if (nil? instrs)
+    (println "0 nil")
+    (loop [i 0
+           instrs instrs]
+      (if (seq instrs)
+        (do
+          (println i (first instrs))
+          (recur (inc i) (rest instrs)))))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; YA-DECLARADO-LOCALMENTE?: Recibe un identificador y un contexto (un vector formado por dos subvectores: el primero
@@ -1910,8 +1940,16 @@
 ; [; (fn main ( ) { println! ( "{}" , TRES ) }) [use std :: io ; const TRES : i64 = 3] :sin-errores [[0] [[io [lib ()] 0] [TRES [const i64] 3]]] 0 [[CAL 0] HLT] []]
 ;                                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ ^^^^^^^^^^^^ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(defn cargar-const-en-tabla []
-  (println "FIX ME"))
+(defn cargar-const-en-tabla [amb]
+  (if (not= (estado amb) :sin-errores) amb
+      (let [simbs (simb-ya-parseados amb)
+            const-idx (last (keep-indexed #(if (= 'const %2) %1) (simb-ya-parseados amb)))
+            id (nth simbs (+ const-idx 1))
+            tipo ['const (nth simbs (+ const-idx 3))]
+            val (nth simbs (+ const-idx 5))
+            ctx-ternas (second (contexto amb))
+            new-ctx (assoc-in (contexto amb) [1 (count ctx-ternas)] [id tipo val])]
+        (assoc amb 4 new-ctx))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; INICIALIZAR-CONTEXTO-LOCAL: Recibe un ambiente y, si su estado no es :sin-errores, lo devuelve intacto.
@@ -1948,7 +1986,7 @@
       (let [ctx-pos (first (contexto amb))
             ctx-vars (second (contexto amb))
             to-drop (last ctx-pos)]
-        (assoc amb 4 [(drop-last 1 ctx-pos) (subvec ctx-vars 0 to-drop)]))))
+        (assoc amb 4 [(pop ctx-pos) (subvec ctx-vars 0 to-drop)]))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; BUSCAR-TIPO-DE-RETORNO: Recibe un ambiente y la direccion de una funcion a ser buscada en el segundo subvector del
@@ -1962,8 +2000,11 @@
 ; user=> (buscar-tipo-de-retorno [(symbol ";") (list 'println! (symbol "(") "La suma de 5 mas 7 es {}" (symbol ",") 'suma (symbol "(") 5 (symbol ",") 7 (symbol ")") (symbol ")") (symbol ";") (symbol "}")) ['fn 'suma (symbol "(") 'x (symbol ":") 'i64 (symbol ",") 'y (symbol ":") 'i64 (symbol ")") (symbol "->") 'i64 (symbol "{") 'x '+ 'y (symbol "}") 'fn 'main (symbol "(") (symbol ")") (symbol "{") 'suma (symbol "(") 5 (symbol ",") 7 (symbol ")")] :sin-errores [[0 2] [['suma ['fn [(list ['x (symbol ":") 'i64] ['y (symbol ":") 'i64]) 'i64]] 2] ['main ['fn [() ()]] 8]]] 0 [['CAL 8] 'HLT ['POPARG 1] ['POPARG 0] ['PUSHFM 0] ['PUSHFM 1] 'ADD 'RET ['PUSHFI 5] ['PUSHFI 7] ['CAL 2]] [[2 ['i64 nil] ['i64 nil]] [8]]] 1)
 ; nil
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(defn buscar-tipo-de-retorno []
-  (println "FIX ME"))
+(defn buscar-tipo-de-retorno [amb dir-fn]
+  (let [func (filter #(= (% 2) dir-fn) (second (contexto amb)))
+        ret-type ((comp second second second first) func)]
+    (if (empty? func) nil ret-type)))
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; GENERAR-REF: Recibe un ambiente y, si su estado no es :sin-errores, lo devuelve intacto.
@@ -1978,8 +2019,10 @@
 ; [) (; println! ( "{}" , v ) ; }) [fn inc ( v : & mut i64 ) { * v += 1 ; } fn main ( ) { let mut v : i64 = 5 ; inc ( & mut v] :sin-errores [[0 2] [[inc [fn [([v : & mut i64]) ()]] 2] [main [fn [() ()]] 6] [v [var-mut i64] 0]]] 1 [[CAL 6] HLT [POPARG 0] [PUSHFI 1] [POPADDREF 0] RETN [PUSHFI 5] [POP 0] [PUSHADDR 0]] [[2 [i64 nil]] [6 [i64 nil]]]]
 ;                                                                                                                           ^  ^^^^^^^^^^^^                                                                    ^^^^^^^^^^^^^^^^^                                                                               ^^^^^^^^^^^^
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(defn generar-ref []
-  (println "FIX ME"))
+(defn generar-ref [amb]
+  (if (not= (estado amb) :sin-errores) amb
+      (let [var (last (second (contexto amb)))]
+        (generar amb 'PUSHADDR (last var)))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; FIXUP: Recibe un ambiente y la ubicacion de un JMP ? a corregir en el vector de bytecode. Si el estado no es
@@ -1993,8 +2036,9 @@
 ; [{ (x = 20 ; } ; println! ( "{}" , x ) }) [fn main ( ) { let x : i64 ; if false { x = 10 ; } else] :sin-errores [[0 1 2] [[main [fn [() ()]] 2] [x [var-inmut i64] 0]]] 1 [[CAL 2] HLT [PUSHFI false] [JC 5] [JMP 8] [PUSHFI 10] [POP 0] [JMP ?]] [[2 [i64 nil]]]]
 ;                                                                                                    ^^^^^^^^^^^^                                                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^: tamano 8                                                                                                                                                                                                                                        ^ ubicacion de JMP ? en contexto
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(defn fixup []
-  (println "FIX ME"))
+(defn fixup [amb jmp-pos]
+  (if (not= (estado amb) :sin-errores) amb
+      (assoc-in amb [6 jmp-pos] ['JMP (count (bytecode amb))])))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; CONVERTIR-FORMATO-IMPRESION: Recibe una lista con los argumentos de print! de Rust y devuelve una lista con los
@@ -2071,8 +2115,15 @@
 ; user=> (compatibles? 'char ['a])
 ; true
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(defn compatibles? []
-  (println "FIX ME"))
+(defn compatibles? [rust-type clojure-val]
+  (if (vector? clojure-val) true
+      (cond
+        (and (integer? clojure-val) (or (= \u (first (str rust-type))) (= \i (first (str rust-type))))) true
+        (and (float? clojure-val) (= \f (first (str rust-type)))) true
+        (and (cadena? clojure-val) (= 'String rust-type)) true
+        (and (booleano? clojure-val) (= 'bool rust-type)) true
+        (and (char? clojure-val) (= 'char rust-type)) true
+        :else false)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; PASAR-A-INT: Recibe un elemento. Si puede devolverlo expresado como un entero, lo hace. Si no, lo devuelve intacto.
