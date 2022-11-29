@@ -2125,8 +2125,9 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defn generar-ref [amb]
   (if (not= (estado amb) :sin-errores) amb
-      (let [var (last (second (contexto amb)))]
-        (generar amb 'PUSHADDR (last var)))))
+      (let [var (last (simb-ya-parseados amb))
+            ctx-var (last (filter #(= (first %) var) (second (contexto amb))))]
+        (generar amb 'PUSHADDR (last ctx-var)))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; FIXUP: Recibe un ambiente y la ubicacion de un JMP ? a corregir en el vector de bytecode. Si el estado no es
