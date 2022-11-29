@@ -19,7 +19,7 @@
     (is (true? (identificador? 'boolean)))
     (is (true? (identificador? '_return)))
     (is (false? (identificador? 'return)))
-    ;; (is (false? (identificador? 'bool))) -> Estoy casi seguro de que este ejemplo esta mal
+    (is (false? (identificador? 'bool)))
     (is (true? (identificador? 'e120)))
     (is (false? (identificador? '12e0)))))
 

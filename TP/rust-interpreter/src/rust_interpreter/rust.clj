@@ -1956,10 +1956,12 @@
                 'type 'unsafe 'use 'where 'while
                 'async 'await 'dyn
                 'abstract 'become 'box 'do 'final 'macro 'override 'priv 'typeof 'unsized 'virtual 'yield
-                'try
-                'union})
+                'try 'union
+                'io 'std 'stdin 'stdout 'String 'Write 'process
+                'bool 'i64 'f64
+                })
 (defn palabra-reservada? [token]
-  (contains? KEYWORDS token))
+  (and (contains? KEYWORDS token) (not (identificador? token))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; IDENTIFICADOR?: Recibe un elemento y devuelve true si es un identificador valido en Rust; si no, false.
@@ -1973,14 +1975,12 @@
 ; user=> (identificador? '12e0)
 ; false
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
 (defn identificador? [token]
   (let [c (first (str token))]
     (and
-     (not (palabra-reservada? token))
-     (or
-      (= \_ c)
-      (Character/isLetter c)))))
+     (not (contains? KEYWORDS token))
+     (not (Character/isDigit c))
+     (not (nil? (re-find #"^[a-zA-Z0-9_]*$" (str token)))))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; DUMP: Recibe un vector con instrucciones de la RI y las imprime numeradas a partir de 0. Siempre devuelve nil.
@@ -2189,7 +2189,7 @@
 (defn dividir [a b]
   (cond
     (and (integer? a) (integer? b)) (pasar-a-int (/ a b))
-    (or (float? a) (float? b)) (pasar-a-float (/ a b))))
+    (or (float? a) (float? b)) (/ a b)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; COMPATIBLES?: Recibe dos elementos. Si el primero es un tipo de dato de Rust y el segundo es un valor de Clojure
