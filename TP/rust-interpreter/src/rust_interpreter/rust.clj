@@ -221,7 +221,7 @@
     35 "SE ESPERABA UNA DE LAS PALABRAS RESERVADAS as_str O trim"
     36 "SE ESPERABA UNA DE LAS PALABRAS RESERVADAS to_string O parse"
     37 "SE ESPERABA UN TIPO NUMERICO:  i64, f64 O usize"
-    38 "SE ESPERABA UNA FUNCION MATEMATICA:  sqrt, sin, atan O abs"
+    38 "SE ESPERABA UNA FUNCION MATEMATICA:  recip, sqrt, sin, atan O abs"
     39 "SE ESPERABA UN NUMERO"
     40 "SE ESPERABA LA PALABRA RESERVADA fn"
     41 "DECLARACION DUPLICADA DE IDENTIFICADOR DE BIBLIOTECA, CONSTANTE O FUNCION"
@@ -644,7 +644,7 @@
     amb))
 
 (defn hace-push-implicito? [instr]
-  (contains? #{'ADD 'SUB 'MUL 'DIV 'MOD 'OR 'AND 'EQ 'NEQ 'GT 'GTE 'LT 'LTE 'NEG 'NOT 'SQRT 'SIN 'ATAN 'ABS 'TOI 'TOF} instr))
+  (contains? #{'ADD 'SUB 'MUL 'DIV 'MOD 'OR 'AND 'EQ 'NEQ 'GT 'GTE 'LT 'LTE 'NEG 'NOT 'SQRT 'SIN 'ATAN 'ABS 'TOI 'TOF 'RECIP} instr))
 
 (defn confirmar-retorno [amb]
   (if (= (estado amb) :sin-errores)
@@ -1003,6 +1003,12 @@
                (expresion)
                (procesar-terminal ,,, (symbol ")") 12)
                (generar ,,, 'SQRT))
+      recip (-> amb
+              (escanear)
+              (procesar-terminal ,,, (symbol "(") 11)
+              (expresion)
+              (procesar-terminal ,,, (symbol ")") 12)
+              (generar ,,, 'RECIP))
       sin (-> amb
               (escanear)
               (procesar-terminal ,,, (symbol "(") 11)
@@ -1845,6 +1851,12 @@
       SIN (let [sin #(Math/sin %)
                 res (aplicar-operador-monadico sin pila)]
             (if (nil? res) res (recur cod regs-de-act (inc cont-prg) res mapa-regs)))
+
+      ; RECIP: Incrementa cont-prg en 1, quita de la pila un elemento numerico, calcula su recíproco y lo coloca al final de la pila.
+      RECIP (let [recip #(pasar-a-float (/ 1 %))
+                res (aplicar-operador-monadico recip pila)]
+            (if (nil? res) res (recur cod regs-de-act (inc cont-prg) res mapa-regs)))
+
 
       ; ATAN: Incrementa cont-prg en 1, quita de la pila un elemento numerico, calcula su arcotangente y la coloca al final de la pila.
       ATAN (let [atan #(Math/atan %)
